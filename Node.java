@@ -1,7 +1,13 @@
+/**
+ * a class that represent a Node in an AVL tree.
+ */
 public class Node {
 
+    /* the private field that represents a left son of the node*/
     private Node rightNode;
+    /* the private field that represents a right son of the node*/
     private Node leftNode;
+    /* the private field that represents the value of a node*/
     private int value;
 
     //the height of the node - a node w/o any children will has a default height of 0
@@ -9,11 +15,15 @@ public class Node {
     //teh 
     private int balanceFactor;
 
-    public Node(){
+    public Node() {
 
     }
 
-    public Node(int value){
+    /**
+     * a constructor for a new Node
+     * @param value: a value to insert to the Node
+     */
+    public Node(int value) {
         this.value = value;
     }
 
