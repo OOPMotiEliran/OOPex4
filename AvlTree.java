@@ -18,6 +18,18 @@ public class AvlTree implements Iterable <Integer> {
     }
 
     /**
+     * A constructor that builds a new AVL tree containing all unique values in the input array.
+     * @param data: the values to add to tree.
+     */
+    public AvlTree(int [] data) {
+        super();
+        for (int curValue : data) {
+            add(curValue);
+        }
+    }
+
+
+    /**
      * @return : the number of nodes in the tree.
      */
     public int size() {
@@ -68,6 +80,10 @@ public class AvlTree implements Iterable <Integer> {
         return false;
     }
 
+    /*
+    this private method receives a value to add and root, and insert it to the tree. if there is a violate
+     in the tree structure, the method fix it.
+     */
     private Node addAndFix(int newValue, Node root){
         if(root == null){
             return new Node(newValue);
@@ -104,6 +120,7 @@ public class AvlTree implements Iterable <Integer> {
         return root;
     }
 
+    /*this private method receives root and update its height and balance factor*/
     private void updateHeightAndBalanceFactor(Node root) {
         int leftHeight = (root.getLeftNode() == null) ? -1 : root.getLeftNode().getHeight();
         int rightHeight = (root.getRightNode() == null) ? -1 : root.getRightNode().getHeight();
@@ -111,6 +128,7 @@ public class AvlTree implements Iterable <Integer> {
         root.setBalanceFactor(leftHeight - rightHeight);
     }
 
+    /*this method handles a LR rotate*/
     private Node rotateLR(Node root){
         Node leftNode = root.getLeftNode();
         Node grandSonRight = leftNode.getRightNode();
@@ -121,6 +139,8 @@ public class AvlTree implements Iterable <Integer> {
         updateHeightAndBalanceFactor(grandSonRight);
         return rotateLL(root);
     }
+
+    /*this method handles a LL rotate*/
     private Node rotateLL(Node root){
         Node leftNode = root.getLeftNode();
         root.setLeftNode(leftNode.getRightNode());
@@ -130,6 +150,7 @@ public class AvlTree implements Iterable <Integer> {
         return leftNode;
     }
 
+    /*this method handles a RL rotate*/
     private Node rotateRL(Node root){
         Node rightNode = root.getRightNode();
         Node grandSonLeft = rightNode.getLeftNode();
@@ -140,6 +161,8 @@ public class AvlTree implements Iterable <Integer> {
         updateHeightAndBalanceFactor(grandSonLeft);
         return rotateRR(root);
     }
+
+    /*this method handles a RR rotate*/
     private Node rotateRR(Node root){
         Node rightNode = root.getRightNode();
         root.setRightNode(rightNode.getLeftNode());
@@ -156,19 +179,46 @@ public class AvlTree implements Iterable <Integer> {
      */
     public boolean delete(int toDelete){
         if(contains(toDelete) != -1){
-            this.rootNode = addAndFix(toDelete, rootNode);
+            this.rootNode = deleteAndFix(toDelete, rootNode);
             this.currentItems--;
             return true;
         }
         return false;
     }
 
-    private Node deleteAndFix(int toDelete, Node root){
-        
+    /*
+    this method delete the given value from the tree rooted in root. it also fix any violation that
+    occurred by the deletion
+     */
+    private Node deleteAndFix(int toDelete, Node root) {
+        int value = root.getValue(); // this is not a null pointer - we know that the value is in the tree
+        if (value == toDelete) {
+            if (isALeaf(root)) {
+                return null;
+            }
+            if (root.getLeftNode() == null) {
+                return root.getRightNode();
+            }
+            if (root.getRightNode() == null) {
+                return root.getLeftNode();
+            }
+            //TODO handle successor
+        }
+        if(value > toDelete) {
+            root.setLeftNode(deleteAndFix(toDelete, root.getLeftNode()));
+        }
+        if(value < toDelete){
+            root.setRightNode(deleteAndFix(toDelete, root.getRightNode()));
+        }
+        updateHeightAndBalanceFactor(root);
 
-
-
+        //TODO handle rotates
         return null;
+    }
+
+    /* this help method checks if the given node is a leaf */
+    private boolean isALeaf (Node node) {
+        return ((node != null) && (node.getRightNode() == null) && (node.getLeftNode() == null));
     }
 
     /**
