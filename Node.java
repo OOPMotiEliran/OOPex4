@@ -28,6 +28,8 @@ public class Node {
      */
     public Node(int value) {
         this.value = value;
+        this.height = 0;
+        this.balanceFactor = 0;
     }
 
 
