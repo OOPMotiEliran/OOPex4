@@ -4,11 +4,14 @@ public class Node {
     private Node leftNode;
     private int value;
 
-    //the height of the node - a node w/o any children will has a default height of 0
+    /*the height of the node - a node w/o any children will has a default height of 0*/
     private int height;
-    //teh 
+    /*the balance factor of the node. calculated by - (BF = height of left node - height of right node)*/
     private int balanceFactor;
 
+    /**
+     * Default constructor - creates a node with no left or right nodes.
+     */
     public Node(){
 
     }
