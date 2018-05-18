@@ -1,6 +1,9 @@
-import java.util.ArrayList;
+package oop.ex4.data_structures;
 import java.util.Iterator;
 
+/**
+ * This class is the complete and tested implementation of an AVL-tree.
+ */
 public class AvlTree implements Iterable <Integer> {
 
     /* a private Node which represent the root of the tree*/
@@ -8,6 +11,28 @@ public class AvlTree implements Iterable <Integer> {
 
     /* a private Node which represent the root of the tree*/
     private int currentItems;
+
+    /* the final constant of the height of a leaf which is by def -1. do not change this. */
+    private static final int HEIGHT_OF_A_LEAF = -1;
+
+    /* the final constant of a node balance factor which means that the root has a right violation. */
+    private static final int RIGHT_VIOLATION_FACTOR = -2;
+
+    /* the final constant of a node balance factor which means that the root has a left violation. */
+    private static final int LEFT_VIOLATION_FACTOR = 2;
+
+    /* the final constant of a node balance factor which means that the root's right son has a balance
+    factor of 1, that means we should preform RL rotate . */
+    private static final int RIGHT_SON_BALANCE_FACTOR = 1;
+
+    /* the final constant of a node balance factor which means that the root's left son has a balance
+    factor of -1, that means we should preform LR rotate . */
+    private static final int LEFT_SON_BALANCE_FACTOR = -1;
+
+
+
+
+
 
     /**
      * The default constructor.
@@ -21,10 +46,12 @@ public class AvlTree implements Iterable <Integer> {
      * A constructor that builds a new AVL tree containing all unique values in the input array.
      * @param data: the values to add to tree.
      */
-    public AvlTree(int [] data) {
+    public AvlTree(int [] data){
         this();
-        for (int curValue : data) {
-            add(curValue);
+        if (data != null) {
+            for (int curValue : data) {
+                add(curValue);
+            }
         }
     }
 
@@ -33,8 +60,10 @@ public class AvlTree implements Iterable <Integer> {
      * @param avlTree - tree to be copied
      */
     public AvlTree(AvlTree avlTree) {
-        for (int value : avlTree) {
-            add(value);
+        if (avlTree != null) {
+            for (int value : avlTree) {
+                add(value);
+            }
         }
     }
 
@@ -45,7 +74,7 @@ public class AvlTree implements Iterable <Integer> {
      * @return - maximum number of nodes of height h.
      */
     public static int findMaxNodes(int h) {
-        return ((int)Math.pow(2, h) - 1);
+        return ((int)Math.pow(2, h + 1) - 1);
     }
 
 
@@ -55,12 +84,16 @@ public class AvlTree implements Iterable <Integer> {
      * @return - minimum number of nodes of height h.
      */
     public static int findMinNodes(int h) {
-        int heightMinusOne = 1;
-        int heightMinusTwo = 2;
+        //initial conditions
+        int heightMinusOne = 1; // the min height of a tree in h = 0
+        int heightMinusTwo = 2; // the min height of a tree in h = 1
         if (h == 0) {
             return heightMinusOne;
         }
         int returnValue = 2;
+        //this loop implements a short dynamic algorithm: in each iteration we calculate the number of a
+        //tree in height i, which is the sun of the heights of two min nodes trees (h-1 and h-2) + 1 in
+        //addition adding the height of the current node.
         for (int i = 2; i <= h; i++) {
             returnValue = heightMinusOne + heightMinusTwo + 1;
             heightMinusOne = heightMinusTwo;
@@ -84,26 +117,25 @@ public class AvlTree implements Iterable <Integer> {
      * given value if it was found in the tree, -1 otherwise.
      */
     public int contains(int searchVal){
-        Node node = findNodeByValue(searchVal, rootNode);
-        if(node == null){
-            return -1;
-        }
-        return (rootNode.getHeight() - node.getHeight());
+        return findNodeByValue(searchVal, rootNode);
     }
 
     /*finds and returns the node holding the given value. if no such node exists, returns null*/
-    private Node findNodeByValue(int searchVal, Node root){
+    private int findNodeByValue(int searchVal, Node root){
         if(root == null){
-            return null;
+            return -1;
         }
         int value = root.getValue();
         if(value == searchVal){
-            return root;
+            return 0;
         }
-        else if(value > searchVal){
-            return findNodeByValue(searchVal, root.getLeftNode());
+        int height;
+        if(value > searchVal){
+            height = findNodeByValue(searchVal, root.getLeftNode());
+            return height == -1 ? -1 : ++height;
         }
-        return findNodeByValue(searchVal, root.getRightNode());//when code gets here, the value is the left
+        height = findNodeByValue(searchVal, root.getRightNode());
+        return height == -1 ? -1 : ++height;
     }
 
     /**
@@ -145,21 +177,19 @@ public class AvlTree implements Iterable <Integer> {
         return root;
     }
 
-    /*
-    this function receives a root of a local tree and preforms rotates as needed.
-     */
+    /* this function receives a root of a local tree and preforms rotates as needed.*/
     private Node checkAndRotate(Node root) {
         int currentBalanceFactor = root.getBalanceFactor();
-        if(currentBalanceFactor == 2 && root.getLeftNode() != null){
-            if(root.getLeftNode().getBalanceFactor() == -1){
+        if(currentBalanceFactor == AvlTree.LEFT_VIOLATION_FACTOR && root.getLeftNode() != null){
+            if(root.getLeftNode().getBalanceFactor() == AvlTree.LEFT_SON_BALANCE_FACTOR){
                 root = rotateLR(root);
             }
             else{
                 root = rotateLL(root);
             }
         }
-        else if (currentBalanceFactor == -2 && root.getLeftNode() != null){
-            if(root.getRightNode().getBalanceFactor() == 1){
+        else if (currentBalanceFactor == AvlTree.RIGHT_VIOLATION_FACTOR && root.getRightNode() != null){
+            if(root.getRightNode().getBalanceFactor() == AvlTree.RIGHT_SON_BALANCE_FACTOR){
                 root = rotateRL(root);
             }
             else{
@@ -171,8 +201,10 @@ public class AvlTree implements Iterable <Integer> {
 
     /*this private method receives root and update its height and balance factor*/
     private void updateHeightAndBalanceFactor(Node root) {
-        int leftHeight = (root.getLeftNode() == null) ? -1 : root.getLeftNode().getHeight();
-        int rightHeight = (root.getRightNode() == null) ? -1 : root.getRightNode().getHeight();
+        int leftHeight =
+                (root.getLeftNode() == null) ? AvlTree.HEIGHT_OF_A_LEAF : root.getLeftNode().getHeight();
+        int rightHeight =
+                (root.getRightNode() == null) ? AvlTree.HEIGHT_OF_A_LEAF : root.getRightNode().getHeight();
         root.setHeight(Math.max(leftHeight, rightHeight) + 1);
         root.setBalanceFactor(leftHeight - rightHeight);
     }
@@ -273,6 +305,8 @@ public class AvlTree implements Iterable <Integer> {
         return ((node != null) && (node.getRightNode() == null) && (node.getLeftNode() == null));
     }
 
+
+    /* this help function finds the value of the successor in the tree roted in the given Node.*/
     private int getSuccessorValue(Node root) {
         while (root.getLeftNode() != null) {
             root = root.getLeftNode();
@@ -280,27 +314,14 @@ public class AvlTree implements Iterable <Integer> {
         return root.getValue();
     }
 
+
     /**
      * @return : an iterator for the Avl Tree. The returned iterator iterates over the tree nodes in an
      * ascending order, and does NOT implement the remove() method.
      */
     @Override
     public Iterator<Integer> iterator() {
-        ArrayList <Integer> treeList = new ArrayList<>();
-        insertTreeIntoList(rootNode, treeList);
-        return treeList.iterator();
+        return new TreeIteratorWrapper(rootNode);
     }
-
-    /* this private help method insert a given avl tree which it's root is node, and insert it to a given
-    arrayList in ascending order*/
-    private void insertTreeIntoList(Node node, ArrayList<Integer> list) {
-        if (node == null) {
-            return;
-        }
-        insertTreeIntoList(node.getLeftNode(), list);
-        list.add(node.getValue());
-        insertTreeIntoList(node.getRightNode(), list);
-    }
-
 
 }

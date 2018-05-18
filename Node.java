@@ -1,3 +1,4 @@
+package oop.ex4.data_structures;
 /**
  * a class that represent a Node in an AVL tree.
  */
@@ -15,12 +16,6 @@ public class Node {
     /*the balance factor of the node. calculated by - (BF = height of left node - height of right node)*/
     private int balanceFactor;
 
-    /**
-     * Default constructor - creates a node with no left or right nodes.
-     */
-    public Node(){
-
-    }
 
     /**
      * a constructor for a new Node
