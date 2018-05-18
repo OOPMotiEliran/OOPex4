@@ -49,59 +49,43 @@ the conditions discussed in DAST.
 
 
 ==============================
-=    Results - Discussion    =
+=    Theoretical questions   =
 ==============================
 
-Warm-up phase - I used 10k iterations. This is when my measurement reached plateau.
+1.Find a series of 12 numbers, such that when they are inserted into an empty AVL tree
+one-by-one, the result will be a tree of height 4 (insertions only, no deletions) :
+the series is: {30,10,40,22,50,8,32,35,21,5,9,1}.
 
-Data 1 results:
-    1) First we need to notice that all words in data1 have the same hash code.
-    2) when considering the OpenHashSet we can anticipate that all words will be mapped to the same linked
-       list and for that reason, activating the "contain" method will take a long period of time.
-    3) we can also anticipate that mapping all values to the ClosedHashSet will take a long time because we
-       will have many collisions when trying to add an object to the set. Also, the amount of collisions will
-       be bigger as we add more objects to teh set.
-    4) when going through the results we can see that the assumptions above were indeed true.
-       Adding the data to ClosedSet took a lot of time (when comparing to other sets) - because when adding
-       the elements, there were many collisions (I also checked and as the addition reached the end of the
-       data1 array - it took the hashset more and more time to add the string - as expected).
-       Also, the OpenHash took a lot of time searching for the value in the "contain" function - as expected.
-    5) Given the above, when dealing with a data that has similar hash code, I will use the CloseHashSet
-       because the values will be distributed evenly in the array and finding them will be quite easy.
-       On the other hand, when dealing with data that has different hash code I will choose the OpenHashSet
-       because the linked lists object will not contain many items and so adding and finding items in the set
-       will be relatively fast.
+2.What is the asymptotic running time complexity of the tree construction done in AvlTree(int[] data)?
+the running time is O(nlog(n)). explanation: each insertion cost us log(n) operations. in total we must
+insert n elements, so put this all together is nlog(n).
 
-Hash - Sets comparison:
-    1) When reviewing the results for the "contain" tests, the ClosedHash did better job and took less time in
-       finding the values.
-    2) In the data set initiation tests the OpenHash did better - it did "lose" on the data2 test; but,
-       it was way better in the data1 test.
-    3) Considering all the above, for the most part, the OpenHash did better than the ClosedHash.
+Bonus: What is the best possible running time complexity for a specific case?
+the best running time is also O(nlog(n)), because if we will assume towards contradiction that we can do this
+in a better time complexity, we then could extract all the elements in ascending order (for example by our
+iterator function) to an array, and we will get a sorted array with less operations then O(nlog(n)).
 
-My implementation vs Java's:
-    1) Well, there is no big surprise that Java's sets were better than mine...
-    2) Java's LinkedList on the other hand did not did so good in comparison to my implementation when
-       reviewing the "contains" test - but this could be easily anticipated due to the linked list mechanism.
-    3) On the initiation tests, Java's data structures did a lot better.
-    4) on the "contains" tests, apart from the linked list, Java's classes did pretty much the same as my
-       implementation.
+3. What is the asymptotic running time complexity of the tree construction done in AvlTree(AvlTree avlTree)?
+in our implementation we have done this in O(nlog(n)) - we first make an iterator from the given tree, and
+then insert its elements one by one.
 
-Expectations, reality and surprises
-    1) I did expect the bad performance in the initializing test, however, I did not expect the oddly bad
-       performance of the ClosedHash.
-    2) Java's classes were surprisingly fast. did not see that coming.
-    3) Adding to the linked list took quite some time and I thought it would go faster.
+4. What is the best possible running time complexity for a specific case? (this is not a bonus question!)
+the best running time can reached by extracting all the elements from the tree to a sorted array ( O(n) by
+using our getIterator function) and then adding all the elements from the array and create a full binary tree
+by always inserting the median value in the array. the median is always located in the length/2 index and we
+can add the median value to tree in O(1) operations because we know exactly where to put it.
+we have learned this algorithm in DAST, and prove its complexity given in O(n). put this all together and we
+get total operations of O(n).
 
-Java's HashSet adding data1:
-    1)Java's HashSet took 101ms to add all elements. As I mentioned before, it took me by surprise. It is
-      way (way) better than mine. My best guess is that they use a different, more efficient, type of hashing.
-      We did learn in DAST other ways to hash which are more advanced than open hash and closed hash, so they
-      are probably using one of them.
+5. What is the asymptotic running time complexity of your implementation of the operation
+done in findMinNodes(int h)?
+in our implementation, the asymptotic running time is bounded by the height of the tree, h. in our algorithm,
+we preforms O(h) additions.
 
-Clamping method:
-    1)Until I read this question (after finishing ex3) I did not think about the differences and runtime
-      effects the different clamping method will have. Now I think that the second one (the one not using the
-      "%" operator) will be faster. The mod function should take O(log(n)) where using the "mask" method (with
-      the & operator) should take O(1) - because the computer is simply doing "and" operation on all bits.
-      So looking back I would probably change to the second one.
+6. Is that the best possible asymptotic running time complexity? If not, what is the best achievable
+complexity? we saw a way using the golden ratio that can achieve the answer using almost constant time, by
+using a given formula. we also note that they use the power operation, but we will assume here that we can
+calculate this operation in at most O(log(h)) , where our implementation uses O(h) operations.
+
+
+
