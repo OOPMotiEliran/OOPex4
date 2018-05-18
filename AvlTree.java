@@ -22,10 +22,51 @@ public class AvlTree implements Iterable <Integer> {
      * @param data: the values to add to tree.
      */
     public AvlTree(int [] data) {
-        super();
+        this();
         for (int curValue : data) {
             add(curValue);
         }
+    }
+
+    /**
+     * A copy-constructor that builds the tree from existing tree
+     * @param avlTree - tree to be copied
+     */
+    public AvlTree(AvlTree avlTree) {
+        for (int value : avlTree) {
+            add(value);
+        }
+    }
+
+
+    /**
+     * A method that calculates the maximum number of nodes in an AVL tree of height h,
+     * @param h- height of the tree (a non-negative number).
+     * @return - maximum number of nodes of height h.
+     */
+    public static int findMaxNodes(int h) {
+        return ((int)Math.pow(2, h) - 1);
+    }
+
+
+    /**
+     * A method that calculates the minimum numbers of nodes in an AVL tree of height h,
+     * @param h - height of the tree (a non-negative number).
+     * @return - minimum number of nodes of height h.
+     */
+    public static int findMinNodes(int h) {
+        int heightMinusOne = 1;
+        int heightMinusTwo = 2;
+        if (h == 0) {
+            return heightMinusOne;
+        }
+        int returnValue = 2;
+        for (int i = 2; i <= h; i++) {
+            returnValue = heightMinusOne + heightMinusTwo + 1;
+            heightMinusOne = heightMinusTwo;
+            heightMinusTwo = returnValue;
+        }
+        return returnValue;
     }
 
 
@@ -60,9 +101,9 @@ public class AvlTree implements Iterable <Integer> {
             return root;
         }
         else if(value > searchVal){
-            return findNodeByValue(searchVal, root.getRightNode());
+            return findNodeByValue(searchVal, root.getLeftNode());
         }
-        return findNodeByValue(searchVal, root.getLeftNode());//when code gets here, the value is the left
+        return findNodeByValue(searchVal, root.getRightNode());//when code gets here, the value is the left
     }
 
     /**
@@ -100,6 +141,14 @@ public class AvlTree implements Iterable <Integer> {
         updateHeightAndBalanceFactor(root);
 
         //checking if we need to rotate
+        root = checkAndRotate(root);
+        return root;
+    }
+
+    /*
+    this function receives a root of a local tree and preforms rotates as needed.
+     */
+    private Node checkAndRotate(Node root) {
         int currentBalanceFactor = root.getBalanceFactor();
         if(currentBalanceFactor == 2 && root.getLeftNode() != null){
             if(root.getLeftNode().getBalanceFactor() == -1){
@@ -191,8 +240,8 @@ public class AvlTree implements Iterable <Integer> {
     occurred by the deletion
      */
     private Node deleteAndFix(int toDelete, Node root) {
-        int value = root.getValue(); // this is not a null pointer - we know that the value is in the tree
-        if (value == toDelete) {
+        int rootValue = root.getValue();//this is not a null pointer - we know that the value is in the tree
+        if (rootValue == toDelete) {
             if (isALeaf(root)) {
                 return null;
             }
@@ -202,23 +251,33 @@ public class AvlTree implements Iterable <Integer> {
             if (root.getRightNode() == null) {
                 return root.getLeftNode();
             }
-            //TODO handle successor
+            int successorValue = getSuccessorValue(root.getRightNode());
+            root.setValue(successorValue);
+            root.setRightNode(deleteAndFix(successorValue, root.getRightNode()));
         }
-        if(value > toDelete) {
+        if(rootValue > toDelete) {
             root.setLeftNode(deleteAndFix(toDelete, root.getLeftNode()));
         }
-        if(value < toDelete){
+        if(rootValue < toDelete){
             root.setRightNode(deleteAndFix(toDelete, root.getRightNode()));
         }
         updateHeightAndBalanceFactor(root);
 
-        //TODO handle rotates
-        return null;
+        //check for rotates
+        root = checkAndRotate(root);
+        return root;
     }
 
     /* this help method checks if the given node is a leaf */
     private boolean isALeaf (Node node) {
         return ((node != null) && (node.getRightNode() == null) && (node.getLeftNode() == null));
+    }
+
+    private int getSuccessorValue(Node root) {
+        while (root.getLeftNode() != null) {
+            root = root.getLeftNode();
+        }
+        return root.getValue();
     }
 
     /**
