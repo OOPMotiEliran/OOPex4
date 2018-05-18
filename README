@@ -36,7 +36,10 @@ AvlTree class has to only hold one node - being the root of the tree.
 =  Implementation details   =
 =============================
 AvlTree - the main implementation topics of this class are the add and remove functions.
-add function: the main flow of the add function works with a recursive binary search in the tree to find the
+
+add function: the add function checks if the tree already contains the inputted value - if it doesn't we call
+the addAndFix helper function that we deal with adding and re-balancing the tree.
+the main flow of the add function works with a recursive binary search in the tree to find the
 correct spot to add the received value (assuming it isn't already there). When finding the correct spot, we
 create and add a node in that place, holding the value. After adding the node all we have to do is to update
 the heights of the nodes and re-balance the tree when needed. For that purpose, we use helper functions when
@@ -46,62 +49,25 @@ balanceFactor.
 checkAndRotate(Node root) - this function receives a node and checks weather or not it "breaks" the AVL tree
 conditions. If it does - the function uses four more helper functions created to handel the rotations - using
 the conditions discussed in DAST.
+After finishing the recursion, all relevant nodes will be updated and re-balanced and the main add function
+will return true.
+
+delete function: the delete function first check weather or not the value received is already in the tree. If
+it isn't we return false and it it it we call the deleteAndFix helper function. Like the add helper function,
+this function will use a binary search recursion to find the node that hold the value we want to delete. Upon
+finding the node, there are three cases:
+case 1 - the node has no children: in this case, we set his father's son node to point to null.
+case 2 - the node has 1 child, either left or right: we replace the node's value with his son's and delete the
+son.
+case 3 - the node has more than 2 children (he is the root of a tree with a size > 3), we update the node's
+value with his successor (the smallest value that is bigger than his value), and call the deleteAndFix
+function again, deleting the successor. After deleting the successor, just like the add function, we backtrack
+from the successor node back up the recursion while updating heights and balance factors of all nodes on the
+way - using the same helper functions used in the add method.
+
+in conclusion, the helper function used by both add and delete methods are:
+updateHeightAndBalanceFactor
+checkAndRotate
+and the functions not used by both are addAndFix and deleteAndFix.
 
 
-==============================
-=    Results - Discussion    =
-==============================
-
-Warm-up phase - I used 10k iterations. This is when my measurement reached plateau.
-
-Data 1 results:
-    1) First we need to notice that all words in data1 have the same hash code.
-    2) when considering the OpenHashSet we can anticipate that all words will be mapped to the same linked
-       list and for that reason, activating the "contain" method will take a long period of time.
-    3) we can also anticipate that mapping all values to the ClosedHashSet will take a long time because we
-       will have many collisions when trying to add an object to the set. Also, the amount of collisions will
-       be bigger as we add more objects to teh set.
-    4) when going through the results we can see that the assumptions above were indeed true.
-       Adding the data to ClosedSet took a lot of time (when comparing to other sets) - because when adding
-       the elements, there were many collisions (I also checked and as the addition reached the end of the
-       data1 array - it took the hashset more and more time to add the string - as expected).
-       Also, the OpenHash took a lot of time searching for the value in the "contain" function - as expected.
-    5) Given the above, when dealing with a data that has similar hash code, I will use the CloseHashSet
-       because the values will be distributed evenly in the array and finding them will be quite easy.
-       On the other hand, when dealing with data that has different hash code I will choose the OpenHashSet
-       because the linked lists object will not contain many items and so adding and finding items in the set
-       will be relatively fast.
-
-Hash - Sets comparison:
-    1) When reviewing the results for the "contain" tests, the ClosedHash did better job and took less time in
-       finding the values.
-    2) In the data set initiation tests the OpenHash did better - it did "lose" on the data2 test; but,
-       it was way better in the data1 test.
-    3) Considering all the above, for the most part, the OpenHash did better than the ClosedHash.
-
-My implementation vs Java's:
-    1) Well, there is no big surprise that Java's sets were better than mine...
-    2) Java's LinkedList on the other hand did not did so good in comparison to my implementation when
-       reviewing the "contains" test - but this could be easily anticipated due to the linked list mechanism.
-    3) On the initiation tests, Java's data structures did a lot better.
-    4) on the "contains" tests, apart from the linked list, Java's classes did pretty much the same as my
-       implementation.
-
-Expectations, reality and surprises
-    1) I did expect the bad performance in the initializing test, however, I did not expect the oddly bad
-       performance of the ClosedHash.
-    2) Java's classes were surprisingly fast. did not see that coming.
-    3) Adding to the linked list took quite some time and I thought it would go faster.
-
-Java's HashSet adding data1:
-    1)Java's HashSet took 101ms to add all elements. As I mentioned before, it took me by surprise. It is
-      way (way) better than mine. My best guess is that they use a different, more efficient, type of hashing.
-      We did learn in DAST other ways to hash which are more advanced than open hash and closed hash, so they
-      are probably using one of them.
-
-Clamping method:
-    1)Until I read this question (after finishing ex3) I did not think about the differences and runtime
-      effects the different clamping method will have. Now I think that the second one (the one not using the
-      "%" operator) will be faster. The mod function should take O(log(n)) where using the "mask" method (with
-      the & operator) should take O(1) - because the computer is simply doing "and" operation on all bits.
-      So looking back I would probably change to the second one.
